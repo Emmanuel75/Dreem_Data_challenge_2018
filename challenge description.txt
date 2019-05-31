@@ -1,0 +1,44 @@
+Short description
+We propose to use Dreem headband (dreem.com) to perform sleep stage scoring on 30 seconds epochs of biophysiological signals.
+
+Video of the challenge's presentation at Collège de France is available at: https://www.college-de-france.fr/site/stephane-mallat/Challenge-2017-2018-Classification-en-stade-de-sommeil-par-Rythm.htm
+
+Challenge context
+Sleep plays a vital role in an individual’s health and well-being. Sleep progresses in cycles that involve multiple sleep stages : wake, light sleep, deep sleep, rem sleep. Different sleep stages are associated to different physiological functions. Monitoring sleep stage is beneficial for diagnosing sleep disorders. The gold standard to monitor sleep stages relies on a polysomnography study conducted in a hospital or a sleep lab. Different physiological signals are recorded such as electroencephalogram, electrocardiogram etc. Dreem headband allows to monitor such a signal thanks to three kind of sensors : EEG, Pulse Oxymeter and Accelerometer signals. Sleep stage scoring is then performed visually by an expert on epochs of 30 seconds of signals recording. This scoring is both tedious and time-consuming hence prone to error. This is why automatic analysis has gained a lot of interest.
+
+Challenge goals
+Perform sleep stage scoring accurately.
+
+Data description
+Input Description:
+Each sample represents 30 seconds of recording for a size total dimension of 22500.
+There are three kinds of electrophysiological signals: electroencephalogram, pulse oximeter, accelerometer, leading to the following structure of samples in the dataset:
+• 4 EEG channels sampled at 125Hz (4 x 125 x 30 = 15000 size per sample)
+• 2 Pulse Oxymeter channels (red and infra-red) sampled at 50 Hz (2 x 50 x 30 = 3000 size per sample)
+• 3 Accelerometer channels sampled at 50Hz (3 x 50 x 30 = 4500 size per sample)
+
+Output Description: Integer between 0 and 4 representing the sleep stage of the 30-second window.
+The sleep classification follows the AASM recommendations and was labeled by a single expert.
+• 0 : Wake
+• 1 : N1 (light sleep)
+• 2 : N2
+• 3 : N3 (deep sleep)
+• 4 : REM (paradoxal sleep)
+
+Datasets description: 43830 train samples for 20592 test samples
+
+Given their size (c. 4 Go for training and c. 2 Go for testing), input training and testing data are provided under the HDF5 format (.h5 extension) which is a folder-like container holding the 9 different datasets described above (4 EEG, 2 Pulse Oxymeter and 3 Accelerometer) which can be loaded separately in memory in order not to fill it.
+They can be accessed using the h5py package in Python (included in the Anaconda distribution) through the respective keys: eeg_1, eeg_2, eeg_3, eeg_4, po_ir, po_r, accelerometer_x, accelerometer_y, accelerometer_z . Any of those datasets can then be accessed using :
+
+import h5py
+h5 = h5py.File('filename', "r")
+ds = h5['key'][:]
+
+where filename is either train.h5 or test.h5 and key one of the keys described above. The loaded dataset ds then works like a NumPy array.
+
+Please note that no ID is directly included in the input training or testing data. Rather, the 'id' column is the implicit sample index ranging from 0 to 43829 for training data and from 43830 to 64421 for testing data and shall only appear in the respective output csv files.
+Test output file to submit must be formatted like the training output file : one 'id' column and one 'label' column separated by semi-colons.
+
+Metric: Cohen’s Kappa score : metric used in sleep stage classification. Robust to an unbalanced dataset. 
+
+Reference : Danker-Hopfe, H. et al. Interrater reliability for sleep scoring according to the Rechtschaffen & Kales and the new AASM standard. J. Sleep Res. 18, 74–84 (2009).
